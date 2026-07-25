@@ -1,0 +1,44 @@
+{{- if or (not .Values.argoRollouts) (.Values.argoRollouts.enabled) -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.clusterName }}-argo-rollouts
+  namespace: argocd
+spec:
+  destination:
+    server: {{ .Values.destinationServer }}
+    namespace: argo-rollouts
+  project: {{ .Values.clusterName }}-infra
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 2.37.6  
+    chart: argo-rollouts
+    helm:
+      values: |-
+        dashboard:
+          enabled: "true"
+          ingress:
+            enabled: "true"
+            ingressClassName: alb
+            annotations:
+              alb.ingress.kubernetes.io/ssl-redirect: '443'
+              alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+              alb.ingress.kubernetes.io/target-type: ip
+              alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
+              alb.ingress.kubernetes.io/inbound-cidrs: "{{ .Values.IngressInBoundCIDR }}"
+              alb.ingress.kubernetes.io/certificate-arn: "{{ .Values.ingressACM }}"
+              alb.ingress.kubernetes.io/success-codes: '302'
+              alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=true
+              external-dns.alpha.kubernetes.io/hostname: "{{ .Values.argoRollouts.ingressHost }}"
+              external-dns.alpha.kubernetes.io/aws-weight: "{{ .Values.argoRollouts.WeightedRoutingValue }}"
+              external-dns.alpha.kubernetes.io/set-identifier: "{{ .Values.argoRollouts.RecordId }}"
+            hosts:
+              - "{{ .Values.argoRollouts.ingressHost }}"
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}
