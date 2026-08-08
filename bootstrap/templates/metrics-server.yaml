@@ -1,4 +1,4 @@
-apiVersion: argoproj.io/v1alpha1
+{% comment %} apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
@@ -21,4 +21,4 @@ spec:
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      selfHeal: true {% endcomment %}
