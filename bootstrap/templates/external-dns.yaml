@@ -19,13 +19,13 @@ spec:
           - service
           - ingress
         policy: sync
-        txtOwnerId: "({ . Values. clusterName }}" 
+        txtOwnerId: "{{ .Values.clusterName }}"
         serviceAccount:
           annotations:
-            eks. amazonaws.com/role-arn: arn: aws:iam::{{ .Values.accountId }}: role/eks-{{ . Values.clusterName }
+            eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.accountId }}:role/eks-{{ .Values.clusterName }}-external-dns
         env:
           - name: AWS_DEFAULT_REGION
-            value: "{{ . Values. awsRegion }}"
+            value: "{{ .Values.awsRegion }}"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
